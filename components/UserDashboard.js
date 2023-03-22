@@ -9,6 +9,7 @@ export default function UserDashboard() {
     const { userInfo, currentUser } = useAuth()
     const [edit, setEdit] = useState(null)
     const [todo, setTodo] = useState('')
+    const [time, setTime] = useState('')
     const [edittedValue, setEdittedValue] = useState('')
 
     const { todos, setTodos, loading, error } = useFetchTodos()
@@ -25,7 +26,22 @@ export default function UserDashboard() {
 
     async function handleAddTodo() {
         if (!todo) { return }
+
+        const now = new Date();
+        const options = { 
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false 
+        };
+        const formattedDate = now.toLocaleString('en-US', options);
+        setTime(formattedDate)
+
         const newKey = Object.keys(todos).length === 0 ? 1 : Math.max(...Object.keys(todos)) + 1
+
         setTodos({ ...todos, [newKey]: todo })
         const userRef = doc(db, 'users', currentUser.uid)
         await setDoc(userRef, {
@@ -34,6 +50,8 @@ export default function UserDashboard() {
             }
         }, { merge: true })
         setTodo('')
+
+        
     }
 
     async function handleEditTodo() {
@@ -88,7 +106,7 @@ export default function UserDashboard() {
                 <>
                     {Object.keys(todos).map((todo, i) => {
                         return (
-                            <TodoCard handleEditTodo={handleEditTodo} key={i} handleAddEdit={handleAddEdit} edit={edit} todoKey={todo} edittedValue={edittedValue} setEdittedValue={setEdittedValue} handleDelete={handleDelete}>
+                            <TodoCard handleEditTodo={handleEditTodo} key={i} handleAddEdit={handleAddEdit} edit={edit} todoKey={todo} edittedValue={edittedValue} setEdittedValue={setEdittedValue} handleDelete={handleDelete} time={time}>
                                 {todos[todo]}
                             </TodoCard>
                         )
